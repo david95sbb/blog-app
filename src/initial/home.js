@@ -1,19 +1,42 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import axios from 'axios';
 
-const Home = ( props ) => {
-    const _posts = props.allPost.map( ( obj ) => {
+class Home extends Component{
+    /**
+     * Ejecuta solo una vez esta función
+     */
+    componentDidMount(){
+        this.props.getAllPost();
+    }
+
+    /**
+     * Ejecuta antes de renderizar el componente
+     */
+    componentWillUnmount(){
+        this.props.clear();
+    }
+
+    /**
+     * Renderizar los post
+     */
+    allPost = () => {
+        const _posts = this.props.allPost.map( ( obj ) => {
+            return(
+                <h4 key={ obj.id }> { obj.title } </h4>
+            )
+        } );
+        return _posts;
+    };
+    render(){
         return(
-            <h4 key={ obj.id }> { obj.title } </h4>
-        )
-    } );
-    return (
             <div>
-                <h2>Home</h2>
-                { _posts }
+                <h2>Bienvenido</h2>
+                { this.allPost() }
             </div>
-    );
-};
+        );
+    }
+}
 
 const _mapStateToProps = ( state ) => {
     return {
@@ -23,8 +46,23 @@ const _mapStateToProps = ( state ) => {
 
 const _mapDispatchToProps = ( dispatch ) => {
     return {
-        dispatch1: () => {
-            //dispatch(  )
+        getAllPost: () => {
+            axios.get( 'https://blog-api-u.herokuapp.com/v1/posts' )
+                .then( function ( response ) {
+                    console.log( response );
+                    dispatch( {
+                        type: "DATA_LOADED",
+                        data: response.data
+                    } );
+                } )
+                .catch( function ( e ) {
+                    console.log( e );
+                } )
+        },
+        clear: () => {
+            dispatch( {
+                type: 'CLEAR_DATA'
+            } );
         }
     };
 };
